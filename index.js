@@ -48,9 +48,14 @@ function solve(appNo, day, month, year) {
             },
             data: data
         };
-        const response = yield axios_1.default.request(config);
-        const parsedData = parseHtml(JSON.stringify(response.data));
-        return parsedData;
+        try {
+            const response = yield axios_1.default.request(config);
+            const parsedData = parseHtml(JSON.stringify(response.data));
+            return parsedData;
+        }
+        catch (e) {
+            return null;
+        }
     });
 }
 function parseHtml(htmlContent) {
@@ -67,12 +72,19 @@ function parseHtml(htmlContent) {
 }
 function main(rollNumber) {
     return __awaiter(this, void 0, void 0, function* () {
+        let solved = false;
         for (let year = 2007; year >= 2004; year--) {
+            if (solved) {
+                break;
+            }
             for (let month = 1; month <= 12; month++) {
+                if (solved) {
+                    break;
+                }
                 const dataPromises = [];
                 console.log(`Sending requests for the month ${month} of the year ${year}`);
                 for (let day = 1; day <= 31; day++) {
-                    console.log(`Processing ${rollNumber} for ${year}-${month}-${day}`);
+                    // console.log(`Processing ${rollNumber} for ${year}-${month}-${day}`);                
                     const dataPromise = solve(rollNumber, day.toString(), month.toString(), year.toString());
                     dataPromises.push(dataPromise);
                 }
@@ -80,11 +92,18 @@ function main(rollNumber) {
                 resolvedData.forEach(data => {
                     if (data) {
                         console.log(data);
-                        process.exit(1);
+                        solved = true;
                     }
                 });
             }
         }
     });
 }
-main("240411183517");
+function solveAll() {
+    return __awaiter(this, void 0, void 0, function* () {
+        for (let i = 240411348657; i <= 240411999999; i++) {
+            yield main(i.toString());
+        }
+    });
+}
+solveAll();
